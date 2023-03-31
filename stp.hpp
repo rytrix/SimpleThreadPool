@@ -18,6 +18,7 @@ public:
 
     void spawn_threads(uint32_t count);
     void add_task(std::function<void()> task);
+    void wait_for_tasks();
     bool has_tasks();
     void stop();
     void empty();
@@ -75,6 +76,12 @@ void pool::add_task(std::function<void()> task) {
     std::lock_guard<std::mutex> lock(queue_mutex);
     queue.push(task);
     queue_cond.notify_one();
+}
+
+void pool::wait_for_tasks() {
+    while (has_tasks()) {
+        std::this_thread::yield();
+    }
 }
 
 bool pool::has_tasks() {
