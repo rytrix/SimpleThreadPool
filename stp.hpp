@@ -1,7 +1,8 @@
 #ifndef __STP_POOL_HPP 
 #define __STP_POOL_HPP
-
-#include <iostream>
+#ifdef _DEBUG
+    #include <iostream> // debug std::cout
+#endif
 #include <thread>
 #include <queue>
 #include <functional>
