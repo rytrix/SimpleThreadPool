@@ -22,15 +22,11 @@ int main() {
             }
         });
     }
-    // Sleep(1000);
-    // pool.stop();
+
     pool.~pool();
     
     auto end = std::chrono::steady_clock::now();
     std::cout << "Time taken: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
-
-
-    std::cout << "Ending program " << std::endl;
 
     return 0;
 }
