@@ -9,7 +9,7 @@
 #include <mutex>
 #include <condition_variable>
 
-namespace svp {
+namespace stp {
 
 class pool {
 public:
@@ -123,6 +123,6 @@ void pool::wait_for_task() {
 
 #endif // __POOL_IMPLEMENTATION
 
-} // namespace svp
+} // namespace stp
 
 #endif // __POOL_HPP

@@ -7,7 +7,7 @@
 
 int main() {
 
-    svp::pool pool{};
+    stp::pool pool{};
 
     for(int i = 0; i < 100; i++) {
         pool.add_task([i] {
