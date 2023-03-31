@@ -12,8 +12,6 @@ int main() {
 
     Sleep(1000);
 
-    // std::atomic_int counter{0};
-
     auto start = std::chrono::steady_clock::now();
 
     for(int i = 0; i < 10000; i++) {
@@ -22,9 +20,6 @@ int main() {
             for (double i = 0; i < 100000; i++) {
                 k /= i;
             }
-            
-            // std::cout << "Task " << i << " is running on thread " << std::this_thread::get_id() << std::endl;
-            // Sleep(1000);
         });
     }
     // Sleep(1000);

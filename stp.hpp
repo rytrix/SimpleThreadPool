@@ -33,7 +33,7 @@ private:
     std::queue<std::function<void()>> queue;
     std::vector<std::thread> threads;
 };
-#define STP_POOL_IMPLEMENTATION
+
 #ifdef STP_POOL_IMPLEMENTATION
 
 pool::pool() {
