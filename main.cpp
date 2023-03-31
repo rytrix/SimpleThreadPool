@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <windows.h>
+#include <chrono>
 
 #define STP_POOL_IMPLEMENTATION
 #include "stp.hpp"
@@ -9,16 +10,32 @@ int main() {
 
     stp::pool pool{};
 
-    for(int i = 0; i < 100; i++) {
+    Sleep(1000);
+
+    // std::atomic_int counter{0};
+
+    auto start = std::chrono::steady_clock::now();
+
+    for(int i = 0; i < 10000; i++) {
         pool.add_task([i] {
-            std::cout << "Task " << i << " is running on thread " << std::this_thread::get_id() << std::endl;
-            Sleep(1000);
+            double k = 69;
+            for (double i = 0; i < 100000; i++) {
+                k /= i;
+            }
+            
+            // std::cout << "Task " << i << " is running on thread " << std::this_thread::get_id() << std::endl;
+            // Sleep(1000);
         });
     }
-    
+    // Sleep(1000);
+    // pool.stop();
     pool.~pool();
+    
+    auto end = std::chrono::steady_clock::now();
+    std::cout << "Time taken: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
 
-    std::cout << "Ending program" << std::endl;
+
+    std::cout << "Ending program " << std::endl;
 
     return 0;
 }

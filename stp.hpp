@@ -18,10 +18,10 @@ public:
     ~pool();
 
     void spawn_threads(uint32_t count);
+    void join_threads();
     void add_task(std::function<void()> task);
     void wait_for_tasks();
     bool has_tasks();
-    void stop();
     void empty();
 
 private:
@@ -33,7 +33,7 @@ private:
     std::queue<std::function<void()>> queue;
     std::vector<std::thread> threads;
 };
-
+#define STP_POOL_IMPLEMENTATION
 #ifdef STP_POOL_IMPLEMENTATION
 
 pool::pool() {
@@ -45,24 +45,11 @@ pool::pool(uint32_t thread_count) {
 }
 
 pool::~pool() {
-    // Wait for the queue to become empty
-    while (has_tasks()) {
-        std::this_thread::yield();
-    }
-    // Add the stop task to the queue and set the stop flag
-    {
-        std::lock_guard<std::mutex> lock(queue_mutex);
-        _stop_requested = true;
-        // queue.push(nullptr);
-        queue_cond.notify_all();
-    }
-
-    for (auto& thread : threads) {
-        thread.join();
-    }
+    join_threads();
 }
 
 void pool::spawn_threads(uint32_t count) {
+    _stop_requested = false;
     size_t original_size = threads.size();
     threads.resize(original_size+count);
 #ifdef _DEBUG
@@ -70,6 +57,21 @@ void pool::spawn_threads(uint32_t count) {
 #endif
     for (size_t i = original_size; i < threads.size(); i++) {
         threads[i] = std::thread(&pool::wait_for_task, this);
+    }
+}
+
+void pool::join_threads() {
+    while (has_tasks() && _stop_requested == false) {
+        std::this_thread::yield();
+    }
+    {
+        std::lock_guard<std::mutex> lock(queue_mutex);
+        _stop_requested = true;
+        // queue.push(nullptr);
+        queue_cond.notify_all();
+    }
+    for (auto& thread : threads) {
+        thread.join();
     }
 }
 
@@ -90,12 +92,6 @@ bool pool::has_tasks() {
     return !queue.empty();
 }
 
-void pool::stop() {
-    std::lock_guard<std::mutex> lock(queue_mutex);
-    _stop_requested = true;
-    queue_cond.notify_all();
-}
-
 void pool::empty() {
     std::lock_guard<std::mutex> lock(queue_mutex);
     while (!queue.empty()) {
@@ -109,7 +105,7 @@ void pool::wait_for_task() {
         {
             std::unique_lock<std::mutex> lock(queue_mutex);
             queue_cond.wait(lock, [this] { return _stop_requested || !queue.empty(); });
-            if (_stop_requested && queue.empty()) {
+            if (_stop_requested) {
                 return;
             }
             task = queue.front();
