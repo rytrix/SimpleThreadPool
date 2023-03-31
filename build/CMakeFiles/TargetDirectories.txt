@@ -1,0 +1,3 @@
+D:/c_c++/threadpool/build/CMakeFiles/pool.dir
+D:/c_c++/threadpool/build/CMakeFiles/ALL_BUILD.dir
+D:/c_c++/threadpool/build/CMakeFiles/ZERO_CHECK.dir
