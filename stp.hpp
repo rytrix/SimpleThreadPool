@@ -1,5 +1,6 @@
 #ifndef __STP_POOL_HPP 
 #define __STP_POOL_HPP
+
 #ifdef _DEBUG
     #include <iostream> // debug std::cout
 #endif
@@ -117,8 +118,8 @@ void pool::wait_for_task() {
     }
 }
 
-#endif // __POOL_IMPLEMENTATION
+#endif // STP_POOL_IMPLEMENTATION
 
 } // namespace stp
 
-#endif // __POOL_HPP
+#endif // __STP_POOL_HPP
