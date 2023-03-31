@@ -16,8 +16,8 @@ int main() {
 
     for(int i = 0; i < 10000; i++) {
         pool.add_task([i] {
-            double k = 69;
-            for (double i = 0; i < 100000; i++) {
+            double k = 68.0;
+            for (double i = 1; i < 100000; i++) {
                 k /= i;
             }
         });
