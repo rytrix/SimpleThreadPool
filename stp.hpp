@@ -18,14 +18,14 @@ public:
     pool(uint32_t thread_count);
     ~pool();
 
-    void spawn_threads(uint32_t count);
-    void join_threads();
     void add_task(std::function<void()> task);
     void wait_for_tasks();
     bool has_tasks();
     void empty();
 
 private:
+    void spawn_threads(uint32_t count);
+    void join_threads();
     void wait_for_task();
 
     bool _stop_requested = false;
