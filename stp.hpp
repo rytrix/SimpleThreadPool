@@ -9,6 +9,7 @@
 #include <functional>
 #include <mutex>
 #include <condition_variable>
+#include <atomic>
 
 namespace stp {
 
@@ -20,6 +21,7 @@ public:
 
     void add_task(std::function<void()> task);
     void wait_for_tasks();
+    int get_working_threads();
     bool has_tasks();
     void empty();
 
@@ -29,6 +31,7 @@ private:
     void wait_for_task();
 
     bool _stop_requested = false;
+    std::atomic<int> working_threads;
     std::mutex queue_mutex;
     std::condition_variable queue_cond;
     std::queue<std::function<void()>> queue;
@@ -50,6 +53,7 @@ pool::~pool() {
 }
 
 void pool::spawn_threads(uint32_t count) {
+    working_threads = 0;
     _stop_requested = false;
     size_t original_size = threads.size();
     threads.resize(original_size+count);
@@ -62,15 +66,13 @@ void pool::spawn_threads(uint32_t count) {
 }
 
 void pool::join_threads() {
-    while (has_tasks() && _stop_requested == false) {
-        std::this_thread::yield();
-    }
+    wait_for_tasks();
     {
         std::lock_guard<std::mutex> lock(queue_mutex);
         _stop_requested = true;
         // queue.push(nullptr);
-        queue_cond.notify_all();
     }
+    queue_cond.notify_all();
     for (auto& thread : threads) {
         thread.join();
     }
@@ -83,9 +85,13 @@ void pool::add_task(std::function<void()> task) {
 }
 
 void pool::wait_for_tasks() {
-    while (has_tasks()) {
+    while (has_tasks() && get_working_threads() != 0) {
         std::this_thread::yield();
     }
+}
+
+int pool::get_working_threads() {
+    return working_threads.load(std::memory_order_acquire);
 }
 
 bool pool::has_tasks() {
@@ -113,7 +119,9 @@ void pool::wait_for_task() {
             queue.pop();
         }
         if (task) {
+            working_threads.fetch_add(1);
             task();
+            working_threads.fetch_sub(1);
         }
     }
 }
